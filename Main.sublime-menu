@@ -33,16 +33,16 @@
  {"caption":"ᵡ ━␤"                  	,"command":"delete_line"                      	},
  {"caption":"ᵡ ━"                   	,"command":"delete_line_wo_linebreak"         	},
 //                                  	                                              		//
- {"caption":"Copy Fulllines"        	,"command":"copy_fulllines"                   	},
- {"caption":"Cut Fulllines"         	,"command":"cut_fulllines"                    	},
+ {"caption":"Copy ━"                	,"command":"copy_fulllines"                   	},
+ {"caption":"Cut  ━"                	,"command":"cut_fulllines"                    	},
  {"caption":"Kn Paste"              	,"command":"kn_paste"                         	},
- {"caption":"Kn Paste Above"        	,"command":"paste_above_lines"                	},
+ {"caption":"Kn Paste ↑"            	,"command":"paste_above_lines"                	},
 //                                  	                                              		//
  {"caption":"Swap ━ ↑"              	,"command":"swap_line_up"                     	},
  {"caption":"Swap ━ ↓"              	,"command":"swap_line_down"                   	},
  {"caption":"Duplicate ━"           	,"command":"kn_duplicate_line"                	},
- {"caption":"Blankline Above and Go"	,"command":"blankline_add"                    	,"args":{"forward":false}},
- {"caption":"Blankline Below and Go"	,"command":"blankline_add"                    	,"args":{"forward":true}},
+ {"caption":"Blankline ↑ and Go"    	,"command":"blankline_add"                    	,"args":{"forward":false}},
+ {"caption":"Blankline ↓ and Go"    	,"command":"blankline_add"                    	,"args":{"forward":true}},
 //                                  	                                              		//
  {"caption":"⇚ Indent Less"         	,"command":"kn_indent"                        	,"args":{"forward":false}},
  {"caption":"⇛ Indent More"         	,"command":"kn_indent"                        	,"args":{"forward":true}},
