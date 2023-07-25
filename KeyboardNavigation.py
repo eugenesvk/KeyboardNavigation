@@ -3,6 +3,35 @@ import string
 
 defDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)] # 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
 
+#——————————  Dynamic caller command ——————————
+class MoveKn(sublime_plugin.TextCommand):
+  def run(self, edit, arg, subwordDelims=defDelims):
+    direction, side, wordT, delimT = None, None, None, None
+    if "⎌" in arg:
+      direction	= "Previous"
+    if "↷" in arg:
+      direction	= "Next"
+    if "¦" in arg:
+      delimT = "Boundary"
+    if "¦w" in arg:
+      side 	= "Beg"
+      wordT	= "Subword"
+    if "w¦" in arg:
+      side 	= "End"
+      wordT	= "Subword"
+    if "¦W" in arg:
+      side 	= "Beg"
+      wordT	= "Bigword"
+    if "W¦" in arg:
+      side 	= "End"
+      wordT	= "Bigword"
+    if any(a is None for a in (direction, side, wordT)):
+      return
+    forward = True if (direction == "Next") else False
+    clsName = f"MoveTo{side}Of{wordT}{delimT}Command"
+    clsMoveKn = globals()[clsName]
+    clsMoveKn.run(self, edit, forward=forward, subwordDelims=subwordDelims)
+
 #---------------------------------------------------------------
 class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
