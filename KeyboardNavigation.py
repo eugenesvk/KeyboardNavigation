@@ -6,7 +6,8 @@ defDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(3
 #——————————  Dynamic caller command ——————————
 class MoveKn(sublime_plugin.TextCommand):
   def run(self, edit, arg, subwordDelims=defDelims):
-    moveT, direction, side, wordT, delimT = None, None, None, None, None
+    moveT, direction, wordT, delimT = None, None, None, None
+    side = ''
     if "▋" in arg:
       moveT	= "Select"
     else:
@@ -91,32 +92,12 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 # https://ee.hawaii.edu/~tep/EE160/Book/chap4/subsection2.1.1.1.html
 class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward, subwordDelims=defDelims):
-    view = self.view
-    regionsNew = []
-    for ThisRegion in view.sel():
-      ThisRegionBeg = ThisRegion.a
-      ThisRegionEnd = ThisRegion.b
-      endAdd = 0; endShow = 1
-      if(forward): # forward
-        while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims) ):
-          ThisRegionEnd += 1
-        if   ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b) ):
-          ThisRegionEnd += 1
-      else:        # backward
-        ThisRegionEnd -= 1
-        while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-          ThisRegionEnd -= 1
-        if   ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b) ):
-          ThisRegionEnd -= 1
-        endAdd = 1; endShow = 0
-      regionsNew += [sublime.Region(ThisRegionEnd+endAdd)]
-    if regionsNew:
-      view.sel().clear()
-      view.sel().add_all(regionsNew)
-      view.show(ThisRegionEnd+endShow)
-
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", subwordDelims=subwordDelims)
 class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward, subwordDelims=defDelims):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", subwordDelims=subwordDelims)
+class MoveToSubwordBoundaryCommand(sublime_plugin.TextCommand):
+  def run(self, edit, forward, side, subwordDelims=defDelims):
     view = self.view
     regionsNew = []
     for ThisRegion in view.sel():
@@ -124,16 +105,18 @@ class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
       ThisRegionEnd = ThisRegion.b
       endAdd = 0; endShow = 1
       if(forward): # forward
-        while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims) ):
-          ThisRegionEnd += 1 # skip beg delimiters '¦-ddd¦'
+        if side == "End":
+          while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims) ):
+            ThisRegionEnd += 1 # skip beg delimiters '¦-ddd¦'
         while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims) ):
           ThisRegionEnd += 1
         if   ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b) ):
           ThisRegionEnd += 1
       else:        # backward
         ThisRegionEnd -= 1
-        while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-          ThisRegionEnd -= 1 # skip end delimiters '¦ddd-¦'
+        if side == "End":
+          while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+            ThisRegionEnd -= 1 # skip end delimiters '¦ddd-¦'
         while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
           ThisRegionEnd -= 1
         if   ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b) ):
@@ -146,7 +129,7 @@ class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
       view.show(ThisRegionEnd+endShow)
 
 #---------------------------------------------------------------
-class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
+class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
     view = self.view
     # 32=space 9=tab 10=newline 13=carriagereturn
@@ -259,55 +242,79 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 
 class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward, subwordDelims=defDelims):
+    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", subwordDelims=subwordDelims)
+class SelectToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
+  def run(self, edit, forward, subwordDelims=defDelims):
+    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", subwordDelims=subwordDelims)
+class SelectToSubwordBoundaryCommand(sublime_plugin.TextCommand):
+  def run(self, edit, forward, side, subwordDelims=defDelims):
     view = self.view
     regionsNew = []
     for ThisRegion in view.sel():
       ThisRegionBeg = ThisRegion.a
       ThisRegionEnd = ThisRegion.b
       endAdd = 0; endShow = 1
-      if(ThisRegion.a == ThisRegion.b):
+      if    (ThisRegion.a == ThisRegion.b):
         if(forward): #forward
-          while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
-            ThisRegionEnd += 1
+          if side == "End": # skip beg delimiters '¦-ddd¦'
+            while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+              ThisRegionEnd += 1
+          while(  (ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+            ThisRegionEnd   += 1
           if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegionBeg)):
-            ThisRegionEnd += 1
+            ThisRegionEnd   += 1
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
         else: #backward
           ThisRegionEnd -= 1
-          while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
-            ThisRegionEnd -= 1
-          if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegionBeg)):
+          if side == "End": # skip end delimiters '¦ddd-¦'
+            while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+              ThisRegionEnd -= 1
+          while  ((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+            ThisRegionEnd   -= 1
+          if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegionBeg)):
             ThisRegionEnd -= 1
           endAdd = 1; endShow = 0
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-      elif(ThisRegion.a < ThisRegion.b):
+      elif  (ThisRegion.a < ThisRegion.b):
         if(forward): #forward
-          while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
-            ThisRegionEnd += 1
-          if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
-            ThisRegionEnd += 1
+          if side == "End": # skip beg delimiters '¦-ddd¦'
+            while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+              ThisRegionEnd += 1
+          while  ((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+            ThisRegionEnd   += 1
+          if     ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
+            ThisRegionEnd   += 1
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
         else: #backward
           ThisRegionEnd -= 1
-          while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
-            ThisRegionEnd -= 1
-          if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
-            ThisRegionEnd -= 1
+          if side == "End": # skip end delimiters '¦ddd-¦'
+            while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+              ThisRegionEnd -= 1
+          while  ((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+            ThisRegionEnd   -= 1
+          if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b)):
+            ThisRegionEnd   -= 1
           endAdd = 1; endShow = 0
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-      else: # ThisRegion.a > ThisRegion.b
+      else: #ThisRegion.a > ThisRegion.b
         if(forward): #forward
-          while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
-            ThisRegionEnd += 1
-          if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
-            ThisRegionEnd += 1
+          if side == "End": # skip beg delimiters '¦-ddd¦'
+            while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+              ThisRegionEnd += 1
+          while  ((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+            ThisRegionEnd   += 1
+          if     ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
+            ThisRegionEnd   += 1
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
         else: #backward
           ThisRegionEnd -= 1
-          while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
-            ThisRegionEnd -= 1
-          if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
-            ThisRegionEnd -= 1
+          if side == "End": # skip end delimiters '¦ddd-¦'
+            while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+              ThisRegionEnd -= 1
+          while  ((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+            ThisRegionEnd   -= 1
+          if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b)):
+            ThisRegionEnd   -= 1
           endAdd = 1; endShow = 0
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
     if regionsNew:
