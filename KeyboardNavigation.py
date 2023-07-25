@@ -714,13 +714,13 @@ def KnFullLine(mview, mRegion):
   PosSelectionEnd = mRegion.end()
 
   PosSelectionBeg -= 1
-  while( not( (view.substr(PosSelectionBeg) == chr(10)) or (view.substr(PosSelectionBeg) == chr(13)) ) and (PosSelectionBeg >=0) ):
+  while(not(any(view.substr(PosSelectionBeg) == ch for ch in [chr(10),chr(13)])) and (PosSelectionBeg >=0            ) ):
     PosSelectionBeg -= 1
   PosSelectionBeg += 1
 
   if(PosSelectionBeg != PosSelectionEnd):
     PosSelectionEnd -= 1
-  while( (PosSelectionEnd <= view.size()-1) and not( (view.substr(PosSelectionEnd) == chr(10)) or (view.substr(PosSelectionEnd) == chr(13)) ) ):
+  while(not(any(view.substr(PosSelectionEnd) == ch for ch in [chr(10),chr(13)])) and (PosSelectionEnd <= view.size()-1) ):
     PosSelectionEnd += 1
   if(PosSelectionEnd != view.size()):
     PosSelectionEnd += 1 # add the newline that you found
