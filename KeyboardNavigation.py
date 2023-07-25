@@ -514,10 +514,18 @@ class CopyFulllinesCommand(sublime_plugin.TextCommand):
 class CutFulllinesCommand(sublime_plugin.TextCommand):
   def run(self, edit):
     view = self.view
+    clipboard = ''
+    regionsNew = []
     for ThisRegion in view.sel():
       ThisRegionFullline = KnFullLine(view, ThisRegion)
-      sublime.set_clipboard(view.substr(ThisRegionFullline))
-      self.view.erase(edit, ThisRegionFullline)
+      clipboard += (view.substr(ThisRegionFullline))
+      regionsNew += [ThisRegionFullline]
+      # self.view.erase(edit, ThisRegionFullline)
+    sublime.set_clipboard(clipboard)
+    for reg in regionsNew:
+      self.view.erase(edit, reg)
+    view.sel().clear()
+    view.sel().add(regionsNew[0].a)
 
 #---------------------------------------------------------------
 class KnPasteCommand(sublime_plugin.TextCommand):
