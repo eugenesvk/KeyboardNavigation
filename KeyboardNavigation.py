@@ -418,17 +418,20 @@ class ExpandSelectionToWhitespaceCommand(sublime_plugin.TextCommand):
 class KnLinelimitCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
     view = self.view
+    regionsNew = []
     for ThisRegion in view.sel():
+      ThisRegionBeg = view.line(ThisRegion).begin()
+      ThisRegionEnd = view.line(ThisRegion).end()
       if(forward): #forward
-        ThisRegionEnd = view.line(ThisRegion).end()
-        view.sel().clear()
-        view.sel().add(ThisRegionEnd)
-        view.show(ThisRegionEnd)
+        regionTo    = ThisRegionEnd
+        regionsNew += [regionTo]
       else: #backward
-        ThisRegionEnd = view.line(ThisRegion).begin()
-        view.sel().clear()
-        view.sel().add(ThisRegionEnd)
-        view.show(ThisRegionEnd)
+        regionTo    = ThisRegionBeg
+        regionsNew += [regionTo]
+    if regionsNew:
+      view.sel().clear()
+      view.sel().add_all(regionsNew)
+      view.show(regionTo)
 
 #---------------------------------------------------------------
 class KnIndentCommand(sublime_plugin.TextCommand):
