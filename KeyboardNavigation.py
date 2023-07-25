@@ -6,7 +6,11 @@ defDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(3
 #——————————  Dynamic caller command ——————————
 class MoveKn(sublime_plugin.TextCommand):
   def run(self, edit, arg, subwordDelims=defDelims):
-    direction, side, wordT, delimT = None, None, None, None
+    moveT, direction, side, wordT, delimT = None, None, None, None, None
+    if "▋" in arg:
+      moveT	= "Select"
+    else:
+      moveT	= "Move"
     if "⎌" in arg:
       direction	= "Previous"
     if "↷" in arg:
@@ -28,7 +32,7 @@ class MoveKn(sublime_plugin.TextCommand):
     if any(a is None for a in (direction, side, wordT)):
       return
     forward = True if (direction == "Next") else False
-    clsName = f"MoveTo{side}Of{wordT}{delimT}Command"
+    clsName = f"{moveT}To{side}Of{wordT}{delimT}Command"
     clsMoveKn = globals()[clsName]
     clsMoveKn.run(self, edit, forward=forward, subwordDelims=subwordDelims)
 
