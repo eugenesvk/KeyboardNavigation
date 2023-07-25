@@ -1,6 +1,8 @@
 import sublime, sublime_plugin
 import string
 
+defDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)] # 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
+
 #---------------------------------------------------------------
 class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
@@ -55,10 +57,8 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 
 # https://ee.hawaii.edu/~tep/EE160/Book/chap4/subsection2.1.1.1.html
 class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, forward, subwordDelims=defDelims):
     view = self.view
-    # 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
-    subwordDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)]
     for ThisRegion in view.sel():
       if(forward): #forward
         ThisRegionBeg = ThisRegion.a
@@ -204,10 +204,8 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
           view.show(ThisRegionEnd)
 
 class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, forward, subwordDelims=defDelims):
     view = self.view
-    # 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
-    subwordDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)]
     for ThisRegion in view.sel():
       if(ThisRegion.a == ThisRegion.b):
         if(forward): #forward
@@ -290,10 +288,9 @@ class SelectToKnLinelimitCommand(sublime_plugin.TextCommand):
 
 #---------------------------------------------------------------
 class ExpandSelectionToDelimsCommand(sublime_plugin.TextCommand):
-  def run(self, edit):
+  def run(self, edit, subwordDelims=defDelims):
     view = self.view
     # 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
-    subwordDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)]
     for ThisRegion in view.sel():
       ThisRegionBeg = ThisRegion.begin() - 1
       ThisRegionEnd = ThisRegion.end()
@@ -583,10 +580,8 @@ class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
         view.show(ThisRegionEnd)
 
 class DeleteToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, forward, subwordDelims=defDelims):
     view = self.view
-    # 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
-    subwordDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)]
     for ThisRegion in view.sel():
       if(ThisRegion.a != ThisRegion.b):
         view.erase(edit, sublime.Region(ThisRegion.a, ThisRegion.b))
