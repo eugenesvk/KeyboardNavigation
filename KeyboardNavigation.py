@@ -501,13 +501,15 @@ class KnIndentCommand(sublime_plugin.TextCommand):
 class CopyFulllinesCommand(sublime_plugin.TextCommand):
   def run(self, edit):
     view = self.view
+    clipboard = ''
     for ThisRegion in view.sel():
       strThisRegionFullline = view.substr(KnFullLine(view, ThisRegion))
 
       if( (strThisRegionFullline[-1] == chr(10)) or (strThisRegionFullline[-1] == chr(13)) ):
-        sublime.set_clipboard(strThisRegionFullline)
+        clipboard += (strThisRegionFullline)
       else: # there was no newline found at the end - this means it is the last line in the document, so add a newline for it
-        sublime.set_clipboard(strThisRegionFullline + chr(10))
+        clipboard += (strThisRegionFullline + chr(10))
+    sublime.set_clipboard(clipboard)
 
 class CutFulllinesCommand(sublime_plugin.TextCommand):
   def run(self, edit):
