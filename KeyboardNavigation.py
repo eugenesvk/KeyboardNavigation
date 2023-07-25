@@ -442,8 +442,11 @@ class KnIndentCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
     view = self.view
     RegionsSelOld = list(view.sel())
-    #view.sel().clear()
+    regionsNew = []
     for ThisRegion in RegionsSelOld:
+      ThisRegionBeg = ThisRegion.begin()
+      ThisRegionEnd = ThisRegion.end()
+      beginAdd = 1; beginShow = 1
       ThisRegionFullline = KnFullLine(view, ThisRegion)
       StrContent = view.substr(ThisRegionFullline)
       ListLinesStrContent = StrContent.splitlines(True)
@@ -451,16 +454,12 @@ class KnIndentCommand(sublime_plugin.TextCommand):
       ListLinesStrContentNew = list()
       if((NumLines == 0) and forward):
         view.replace(edit, ThisRegionFullline, chr(9))
-        view.sel().clear()
-        view.sel().add(sublime.Region(ThisRegion.begin()+1))
-        view.show(ThisRegion.begin()+1)
+        regionsNew += [sublime.Region(ThisRegionBeg+beginAdd)]
       elif(forward): #forward
         for StrThisLine in ListLinesStrContent:
           ListLinesStrContentNew.append(chr(9)+StrThisLine)
         view.replace(edit, ThisRegionFullline, ''.join(ListLinesStrContentNew))
-        view.sel().clear()
-        view.sel().add(sublime.Region(ThisRegion.begin()+1, ThisRegion.end()+NumLines))
-        view.show(ThisRegion.begin()+1)
+        regionsNew += [sublime.Region(ThisRegionBeg+beginAdd, ThisRegionEnd+NumLines)]
       else: #backward
         NumLinesReplaced = 0
         for StrThisLine in ListLinesStrContent:
@@ -472,30 +471,30 @@ class KnIndentCommand(sublime_plugin.TextCommand):
         if(NumLinesReplaced == 0):
           #print("case lines none contain tabs at beginning")
           pass
-        elif( (ThisRegion.begin() == ThisRegionFullline.begin()) and (ListLinesStrContent[0][0] == chr(9)) ):
+        elif( (ThisRegionBeg == ThisRegionFullline.begin()) and (ListLinesStrContent[0][0] == chr(9)) ):
+          beginAdd = 0; beginShow = 1
           #print("case line 1 cursor at begining of line and contains tab")
           view.replace(edit, ThisRegionFullline, ''.join(ListLinesStrContentNew))
-          view.show(ThisRegion.begin())
-          view.sel().clear()
-          view.sel().add(sublime.Region(ThisRegion.begin(), ThisRegion.end()-NumLinesReplaced+1))
-        elif(ThisRegion.begin() == ThisRegionFullline.begin()):
+          regionsNew += [sublime.Region(ThisRegionBeg+beginAdd, ThisRegionEnd-NumLinesReplaced+1)]
+        elif(ThisRegionBeg == ThisRegionFullline.begin()):
           #print("case line 1 cursor at begininng of line - dont move selection back in beginning")
           view.replace(edit, ThisRegionFullline, ''.join(ListLinesStrContentNew))
-          view.show(ThisRegion.begin())
-          view.sel().clear()
-          view.sel().add(sublime.Region(ThisRegion.begin(), ThisRegion.end()-NumLinesReplaced))
+          beginAdd = 0; beginShow = 0
+          regionsNew += [sublime.Region(ThisRegionBeg+beginAdd, ThisRegionEnd-NumLinesReplaced)]
         elif(view.substr(ThisRegionFullline.begin()) != chr(9)):
           #print("case line 1 contains no tab at beginning - dont move selection back in beginning")
           view.replace(edit, ThisRegionFullline, ''.join(ListLinesStrContentNew))
-          view.show(ThisRegion.begin())
-          view.sel().clear()
-          view.sel().add(sublime.Region(ThisRegion.begin(), ThisRegion.end()-NumLinesReplaced))
+          beginAdd = 0; beginShow = 0
+          regionsNew += [sublime.Region(ThisRegionBeg+beginAdd, ThisRegionEnd-NumLinesReplaced)]
         else:
           #print("case general case - line 1 move selection back 1 - line last move selection back num of tabs removed")
           view.replace(edit, ThisRegionFullline, ''.join(ListLinesStrContentNew))
-          view.show(ThisRegion.begin()-1)
-          view.sel().clear()
-          view.sel().add(sublime.Region(ThisRegion.begin()-1, ThisRegion.end()-NumLinesReplaced))
+          beginAdd = -1; beginShow = -1
+          regionsNew += [sublime.Region(ThisRegionBeg+beginAdd, ThisRegionEnd-NumLinesReplaced)]
+    if regionsNew:
+      view.sel().clear()
+      view.sel().add_all(regionsNew)
+      view.show(ThisRegion+beginShow)
 
 #---------------------------------------------------------------
 class CopyFulllinesCommand(sublime_plugin.TextCommand):
