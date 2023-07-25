@@ -318,17 +318,21 @@ class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
 class SelectToKnLinelimitCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
     view = self.view
+    regionsNew = []
     for ThisRegion in view.sel():
+      ThisRegionBeg = ThisRegion.a
+      ThisRegionEnd = ThisRegion.b
+      endAdd = 0; endShow = 0
       if(forward): #forward
         ThisRegionEnd = view.line(ThisRegion).end()
-        view.sel().clear()
-        view.sel().add(sublime.Region(ThisRegion.a, ThisRegionEnd))
-        view.show(ThisRegionEnd)
+        regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
       else: #backward
         ThisRegionEnd = view.line(ThisRegion).begin()
-        view.sel().clear()
-        view.sel().add(sublime.Region(ThisRegion.a, ThisRegionEnd))
-        view.show(ThisRegionEnd)
+        regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
+    if regionsNew:
+      view.sel().clear()
+      view.sel().add_all(regionsNew)
+      view.show(ThisRegionEnd+endShow)
 
 #---------------------------------------------------------------
 class ExpandSelectionToDelimsCommand(sublime_plugin.TextCommand):
