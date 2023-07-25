@@ -5,7 +5,7 @@ defDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(3
 
 #——————————  Dynamic caller command ——————————
 class MoveKn(sublime_plugin.TextCommand):
-  def run(self, edit, arg, subwordDelims=defDelims):
+  def run(self, edit, arg, caseSep=False, subwordDelims=defDelims):
     moveT, direction, wordT, delimT = None, None, None, None
     side = ''
     if "▋" in arg:
@@ -35,7 +35,7 @@ class MoveKn(sublime_plugin.TextCommand):
     forward = True if (direction == "Next") else False
     clsName = f"{moveT}To{side}Of{wordT}{delimT}Command"
     clsMoveKn = globals()[clsName]
-    clsMoveKn.run(self, edit, forward=forward, subwordDelims=subwordDelims)
+    clsMoveKn.run(self, edit, forward=forward, caseSep=caseSep, subwordDelims=subwordDelims)
 
 #---------------------------------------------------------------
 class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
@@ -91,36 +91,55 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 
 # https://ee.hawaii.edu/~tep/EE160/Book/chap4/subsection2.1.1.1.html
 class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, subwordDelims=defDelims):
-    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", subwordDelims=subwordDelims)
+  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", caseSep=caseSep, subwordDelims=subwordDelims)
 class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, subwordDelims=defDelims):
-    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", subwordDelims=subwordDelims)
+  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", caseSep=caseSep, subwordDelims=subwordDelims)
 class MoveToSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, side, subwordDelims=defDelims):
+  def run(self, edit, forward, side, caseSep=False, subwordDelims=defDelims):
     view = self.view
     regionsNew = []
     for ThisRegion in view.sel():
       ThisRegionBeg = ThisRegion.a
       ThisRegionEnd = ThisRegion.b
       endAdd = 0; endShow = 1
+      curChar = view.substr(ThisRegionEnd)
+      if caseSep:
+        curCase = curChar.isupper() # watch caseChange to stop
       if(forward): # forward
         if side == "End":
-          while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims) ):
+          while((ThisRegionEnd < view.size()) and (curChar     in subwordDelims)):
             ThisRegionEnd += 1 # skip beg delimiters '¦-ddd¦'
-        while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims) ):
-          ThisRegionEnd += 1
-        if   ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b) ):
-          ThisRegionEnd += 1
+            curChar = view.substr(ThisRegionEnd)
+        isFirst = True
+        while  ((ThisRegionEnd < view.size()) and (curChar not in subwordDelims)):
+          ThisRegionEnd   += 1
+          curChar   = view.substr(ThisRegionEnd)
+          if caseSep and not (curCase == (curCase := curChar.isupper())) and not isFirst:
+            if not curCase: # move pre U in abcDEFUpper
+              ThisRegionEnd -= 1
+            break
+          isFirst = False
+        if     ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
+          ThisRegionEnd   += 1
       else:        # backward
         ThisRegionEnd -= 1
-        if side == "End":
-          while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-            ThisRegionEnd -= 1 # skip end delimiters '¦ddd-¦'
-        while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-          ThisRegionEnd -= 1
-        if   ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b) ):
-          ThisRegionEnd -= 1
+        if side == "End": # skip end delimiters '¦ddd-¦'
+          while((ThisRegionEnd >= 0         ) and (curChar     in subwordDelims)):
+            ThisRegionEnd -= 1
+            curChar = view.substr(ThisRegionEnd)
+        isFirst = True
+        while  ((ThisRegionEnd >= 0         ) and (curChar not in subwordDelims)):
+          ThisRegionEnd   -= 1
+          curChar   = view.substr(ThisRegionEnd)
+          if caseSep and not (curCase == (curCase := curChar.isupper())) and not isFirst:
+            if     curCase: # move pre U in abcDEFUpper
+              ThisRegionEnd   -= 1
+            break
+          isFirst = False
+        if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b)):
+          ThisRegionEnd   -= 1
         endAdd = 1; endShow = 0
       regionsNew += [sublime.Region(ThisRegionEnd+endAdd)]
     if regionsNew:
@@ -241,13 +260,13 @@ class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
       view.show(ThisRegionEnd+endShow)
 
 class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, subwordDelims=defDelims):
-    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", subwordDelims=subwordDelims)
+  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
+    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", caseSep=caseSep, subwordDelims=subwordDelims)
 class SelectToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, subwordDelims=defDelims):
-    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", subwordDelims=subwordDelims)
+  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
+    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", caseSep=caseSep, subwordDelims=subwordDelims)
 class SelectToSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, side, subwordDelims=defDelims):
+  def run(self, edit, forward, side, caseSep=False, subwordDelims=defDelims):
     view = self.view
     regionsNew = []
     for ThisRegion in view.sel():
