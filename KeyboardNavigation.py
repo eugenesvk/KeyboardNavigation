@@ -18,7 +18,7 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 		# for ThisRegion in view.sel():
 			if(forward): #forward
 				boolAtNewline = False
-				ThisRegionBegin = ThisRegion.a
+				ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b
 				if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
 					ThisRegionEnd += 1
@@ -39,7 +39,7 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 				view.sel().add(sublime.Region(ThisRegionEnd))
 				view.show(ThisRegionEnd+1)
 			else: #backward
-				ThisRegionBegin = ThisRegion.a
+				ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b-1
 				if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd >= 0) ):
 					ThisRegionEnd -= 1
@@ -61,7 +61,7 @@ class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
 		subwordDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)]
 		for ThisRegion in view.sel():
 			if(forward): #forward
-				ThisRegionBegin = ThisRegion.a
+				ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b
 				while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
 					ThisRegionEnd += 1
@@ -71,7 +71,7 @@ class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
 				view.sel().add(sublime.Region(ThisRegionEnd))
 				view.show(ThisRegionEnd+1)
 			else: #backward
-				ThisRegionBegin = ThisRegion.a
+				ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b-1
 				while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
 					ThisRegionEnd -= 1
@@ -94,7 +94,7 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 			if(ThisRegion.a == ThisRegion.b):
 				if(forward): #forward
 					boolAtNewline = False
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b
 					if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
 						ThisRegionEnd += 1
@@ -112,10 +112,10 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 						if( (ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b) ):
 							ThisRegionEnd += 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 					view.show(ThisRegionEnd+1)
 				else: #backward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b-1
 					if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd >= 0) ):
 						ThisRegionEnd -= 1
@@ -126,12 +126,12 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 					if( (ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b) ):
 						ThisRegionEnd -= 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 					view.show(ThisRegionEnd)
 			elif(ThisRegion.a < ThisRegion.b):
 				if(forward): #forward
 					boolAtNewline = False
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b
 					if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
 						ThisRegionEnd += 1
@@ -149,47 +149,47 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 						if( (ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b) ):
 							ThisRegionEnd += 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 					view.show(ThisRegionEnd+1)
 				else: #backward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b-1
-					while( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd > ThisRegionBegin-1) and (ThisRegionEnd >= 0)):
+					while( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd > ThisRegionBeg-1) and (ThisRegionEnd >= 0)):
 						ThisRegionEnd -= 1
-					while( (view.substr(ThisRegionEnd) in spaceChars) and (ThisRegionEnd > ThisRegionBegin-1) and (ThisRegionEnd >= 0) ):
+					while( (view.substr(ThisRegionEnd) in spaceChars) and (ThisRegionEnd > ThisRegionBeg-1) and (ThisRegionEnd >= 0) ):
 						ThisRegionEnd -= 1
-					while( (view.substr(ThisRegionEnd) not in whiteChars) and (ThisRegionEnd > ThisRegionBegin-1) and (ThisRegionEnd >= 0)):
+					while( (view.substr(ThisRegionEnd) not in whiteChars) and (ThisRegionEnd > ThisRegionBeg-1) and (ThisRegionEnd >= 0)):
 						ThisRegionEnd -= 1
 					if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
 						ThisRegionEnd -= 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 					view.show(ThisRegionEnd)
 			else: # ThisRegion.a > ThisRegion.b
 				if(forward): #forward
 					boolAtNewline = False
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b
 					if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
 						ThisRegionEnd += 1
 					else:
-						while( ((view.substr(ThisRegionEnd) not in spaceChars) or (view.substr(ThisRegionEnd) in newlineChars)) and (ThisRegionEnd < ThisRegionBegin) and (ThisRegionEnd < view.size())):
+						while( ((view.substr(ThisRegionEnd) not in spaceChars) or (view.substr(ThisRegionEnd) in newlineChars)) and (ThisRegionEnd < ThisRegionBeg) and (ThisRegionEnd < view.size())):
 							if(view.substr(ThisRegionEnd) == newlineChar):
 								boolAtNewline = True
 								ThisRegionEnd += 1
 								break
 							ThisRegionEnd += 1
-						while( ((view.substr(ThisRegionEnd) in spaceChars) or boolAtNewline) and (ThisRegionEnd < ThisRegionBegin) and (ThisRegionEnd < view.size())):
+						while( ((view.substr(ThisRegionEnd) in spaceChars) or boolAtNewline) and (ThisRegionEnd < ThisRegionBeg) and (ThisRegionEnd < view.size())):
 							if(boolAtNewline):
 								break
 							ThisRegionEnd += 1
 						if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
 							ThisRegionEnd += 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 					view.show(ThisRegionEnd+1)
 				else: #backward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b-1
 					if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd >= 0) ):
 						ThisRegionEnd -= 1
@@ -200,7 +200,7 @@ class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 					if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
 						ThisRegionEnd -= 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 					view.show(ThisRegionEnd)
 
 class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
@@ -211,66 +211,66 @@ class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
 		for ThisRegion in view.sel():
 			if(ThisRegion.a == ThisRegion.b):
 				if(forward): #forward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b
 					while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
 						ThisRegionEnd += 1
-					if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegionBegin)):
+					if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegionBeg)):
 						ThisRegionEnd += 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 					view.show(ThisRegionEnd+1)
 				else: #backward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b-1
 					while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
 						ThisRegionEnd -= 1
-					if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegionBegin)):
+					if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegionBeg)):
 						ThisRegionEnd -= 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 					view.show(ThisRegionEnd)
 			elif(ThisRegion.a < ThisRegion.b):
 				if(forward): #forward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b
 					while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
 						ThisRegionEnd += 1
 					if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
 						ThisRegionEnd += 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 					view.show(ThisRegionEnd+1)
 				else: #backward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b-1
 					while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
 						ThisRegionEnd -= 1
 					if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
 						ThisRegionEnd -= 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 					view.show(ThisRegionEnd)
 			else: # ThisRegion.a > ThisRegion.b
 				if(forward): #forward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b
 					while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
 						ThisRegionEnd += 1
 					if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
 						ThisRegionEnd += 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 					view.show(ThisRegionEnd+1)
 				else: #backward
-					ThisRegionBegin = ThisRegion.a
+					ThisRegionBeg = ThisRegion.a
 					ThisRegionEnd = ThisRegion.b-1
 					while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
 						ThisRegionEnd -= 1
 					if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
 						ThisRegionEnd -= 1
 					view.sel().clear()
-					view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+					view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 					view.show(ThisRegionEnd)
 
 class SelectToKnLinelimitCommand(sublime_plugin.TextCommand):
@@ -295,13 +295,13 @@ class ExpandSelectionToDelimsCommand(sublime_plugin.TextCommand):
 		# 32=space 9=tab 10=newline 13=carriagereturn 34=" 35=# 36=$ 37=% 38=& 39=' 61== 64=@ 58=: 63=? 46=. 44=, 43=+ 95=_ 45=- 60=< 62=> 40=( 41=) 91=[ 93=] 123={ 125=} 124=| 47=/ 92=\
 		subwordDelims = [chr(32), chr(9), chr(10), chr(13), chr(34), chr(35), chr(36), chr(37), chr(38), chr(39), chr(61), chr(64), chr(58), chr(63), chr(46), chr(44), chr(43), chr(95), chr(45), chr(60), chr(62), chr(40), chr(41), chr(91), chr(93), chr(123), chr(125), chr(124), chr(47), chr(92)]
 		for ThisRegion in view.sel():
-			ThisRegionBegin = ThisRegion.begin() - 1
+			ThisRegionBeg = ThisRegion.begin() - 1
 			ThisRegionEnd = ThisRegion.end()
-			if( (ThisRegion.begin() != ThisRegionEnd) and (view.substr(ThisRegionBegin) in subwordDelims) ):
-				ThisRegionBegin -= 1
-			while( (view.substr(ThisRegionBegin) not in subwordDelims) and (ThisRegionBegin >= 0) ):
-				ThisRegionBegin -= 1
-			ThisRegionBegin += 1
+			if( (ThisRegion.begin() != ThisRegionEnd) and (view.substr(ThisRegionBeg) in subwordDelims) ):
+				ThisRegionBeg -= 1
+			while( (view.substr(ThisRegionBeg) not in subwordDelims) and (ThisRegionBeg >= 0) ):
+				ThisRegionBeg -= 1
+			ThisRegionBeg += 1
 
 			if( (ThisRegion.begin() != ThisRegionEnd) and (view.substr(ThisRegionEnd) in subwordDelims) ):
 				ThisRegionEnd += 1
@@ -309,7 +309,7 @@ class ExpandSelectionToDelimsCommand(sublime_plugin.TextCommand):
 				ThisRegionEnd += 1
 
 			# view.sel().clear()
-			view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+			view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 
 class ExpandSelectionToQuotesCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -318,17 +318,17 @@ class ExpandSelectionToQuotesCommand(sublime_plugin.TextCommand):
 		beginDelims = [chr(34), chr(39)]
 		endDelims = [chr(34), chr(39)]
 		for ThisRegion in view.sel():
-			ThisRegionBegin = ThisRegion.begin() - 1
+			ThisRegionBeg = ThisRegion.begin() - 1
 			ThisRegionEnd = ThisRegion.end()
-			while( (view.substr(ThisRegionBegin) not in beginDelims) and (ThisRegionBegin >= 0)):
-				ThisRegionBegin -= 1
-			ThisRegionBegin += 1
+			while( (view.substr(ThisRegionBeg) not in beginDelims) and (ThisRegionBeg >= 0)):
+				ThisRegionBeg -= 1
+			ThisRegionBeg += 1
 
 			while( (view.substr(ThisRegionEnd) not in endDelims) and (ThisRegionEnd < view.size())):
 				ThisRegionEnd += 1
 
 			# view.sel().clear()
-			view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+			view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 
 class ExpandSelectionToBracketsCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -338,19 +338,19 @@ class ExpandSelectionToBracketsCommand(sublime_plugin.TextCommand):
 		# endDelims = [chr(62), chr(41), chr(93), chr(125)]
 		BracketDelims = [chr(60), chr(40), chr(91), chr(123), chr(62), chr(41), chr(93), chr(125)]
 		for ThisRegion in view.sel():
-			ThisRegionBegin = ThisRegion.begin() - 1
+			ThisRegionBeg = ThisRegion.begin() - 1
 			ThisRegionEnd = ThisRegion.end()
-			# while( (view.substr(ThisRegionBegin) not in beginDelims) and (ThisRegionBegin >= 0)):
-			while( (view.substr(ThisRegionBegin) not in BracketDelims) and (ThisRegionBegin >= 0)):
-				ThisRegionBegin -= 1
-			ThisRegionBegin += 1
+			# while( (view.substr(ThisRegionBeg) not in beginDelims) and (ThisRegionBeg >= 0)):
+			while( (view.substr(ThisRegionBeg) not in BracketDelims) and (ThisRegionBeg >= 0)):
+				ThisRegionBeg -= 1
+			ThisRegionBeg += 1
 
 			# while( (view.substr(ThisRegionEnd) not in endDelims) and (ThisRegionEnd < view.size())):
 			while( (view.substr(ThisRegionEnd) not in BracketDelims) and (ThisRegionEnd < view.size())):
 				ThisRegionEnd += 1
 
 			# view.sel().clear()
-			view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+			view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 
 class ExpandSelectionToWhitespaceCommand(sublime_plugin.TextCommand):
 	def run(self, edit):
@@ -358,20 +358,20 @@ class ExpandSelectionToWhitespaceCommand(sublime_plugin.TextCommand):
 		# 32=space 9=tab 10=newline 13=carriagereturn 
 		whiteChars = (chr(32), chr(9), chr(10), chr(13))
 		for ThisRegion in view.sel():
-			ThisRegionBegin = ThisRegion.begin() - 1
-			while( (view.substr(ThisRegionBegin) not in whiteChars) and (ThisRegionBegin >= 0)):
-				ThisRegionBegin -= 1
-			ThisRegionBegin += 1
+			ThisRegionBeg = ThisRegion.begin() - 1
+			while( (view.substr(ThisRegionBeg) not in whiteChars) and (ThisRegionBeg >= 0)):
+				ThisRegionBeg -= 1
+			ThisRegionBeg += 1
 
 			ThisRegionEnd = ThisRegion.end()
 			while( (view.substr(ThisRegionEnd) not in whiteChars) and (ThisRegionEnd < view.size())):
 				ThisRegionEnd += 1
 
-			# if(ThisRegionBegin != ThisRegionEnd):
+			# if(ThisRegionBeg != ThisRegionEnd):
 			# view.sel().clear()
-			view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd))
+			view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd))
 			# else:
-			# 	view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionBegin))
+			# 	view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionBeg))
 
 #---------------------------------------------------------------
 class KnLinelimitCommand(sublime_plugin.TextCommand):
@@ -488,18 +488,18 @@ class PasteAboveLinesCommand(sublime_plugin.TextCommand):
 		view = self.view
 		for ThisRegion in view.sel():
 
-			PosSelectionBegin = ThisRegion.begin()-1
-			while( not( (view.substr(PosSelectionBegin) == chr(10)) or (view.substr(PosSelectionBegin) == chr(13)) ) and (PosSelectionBegin > 0) ):
-				PosSelectionBegin -= 1
-			PosSelectionBegin += 1
+			PosSelectionBeg = ThisRegion.begin()-1
+			while( not( (view.substr(PosSelectionBeg) == chr(10)) or (view.substr(PosSelectionBeg) == chr(13)) ) and (PosSelectionBeg > 0) ):
+				PosSelectionBeg -= 1
+			PosSelectionBeg += 1
 			
 			sublimeclipboard = sublime.get_clipboard()
 			if(sublimeclipboard[-1:] != chr(10)):
 				#print("ended in a newline not, adding one")
-				view.insert(edit, PosSelectionBegin, chr(10))
-				view.insert(edit, PosSelectionBegin, sublimeclipboard)
+				view.insert(edit, PosSelectionBeg, chr(10))
+				view.insert(edit, PosSelectionBeg, sublimeclipboard)
 			else:
-				view.insert(edit, PosSelectionBegin, sublimeclipboard)
+				view.insert(edit, PosSelectionBeg, sublimeclipboard)
 
 #---------------------------------------------------------------
 # duplicates line above (instead of below like innate one)
@@ -508,28 +508,28 @@ class KnDuplicateLineCommand(sublime_plugin.TextCommand):
 		view = self.view
 		for ThisRegion in view.sel():
 
-			PosSelectionBegin = ThisRegion.begin()
+			PosSelectionBeg = ThisRegion.begin()
 			PosSelectionEnd = ThisRegion.end()
 			
-			PosSelectionBegin -= 1
-			while( (PosSelectionBegin >= 0) and not( (view.substr(PosSelectionBegin) == chr(10)) or (view.substr(PosSelectionBegin) == chr(13)) ) ):
-				PosSelectionBegin -= 1
-			PosSelectionBegin += 1
+			PosSelectionBeg -= 1
+			while( (PosSelectionBeg >= 0) and not( (view.substr(PosSelectionBeg) == chr(10)) or (view.substr(PosSelectionBeg) == chr(13)) ) ):
+				PosSelectionBeg -= 1
+			PosSelectionBeg += 1
 
-			if(PosSelectionBegin != PosSelectionEnd):
+			if(PosSelectionBeg != PosSelectionEnd):
 				PosSelectionEnd -= 1
 			while( (PosSelectionEnd < view.size()) and not( (view.substr(PosSelectionEnd) == chr(10)) or (view.substr(PosSelectionEnd) == chr(13)) ) ):
 				PosSelectionEnd += 1
 			if(PosSelectionEnd != view.size()):
 				PosSelectionEnd += 1 # add the newline that you found
 
-			strThisRegionFullline = view.substr(sublime.Region(PosSelectionBegin, PosSelectionEnd))
+			strThisRegionFullline = view.substr(sublime.Region(PosSelectionBeg, PosSelectionEnd))
 		
 			if(strThisRegionFullline[-1:] != chr(10)):
-				view.insert(edit, PosSelectionBegin, chr(10))
-				view.insert(edit, PosSelectionBegin, strThisRegionFullline)
+				view.insert(edit, PosSelectionBeg, chr(10))
+				view.insert(edit, PosSelectionBeg, strThisRegionFullline)
 			else:
-				view.insert(edit, PosSelectionBegin, strThisRegionFullline)
+				view.insert(edit, PosSelectionBeg, strThisRegionFullline)
 
 #---------------------------------------------------------------
 class BlanklineAddCommand(sublime_plugin.TextCommand):
@@ -560,7 +560,7 @@ class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 				view.erase(edit, sublime.Region(ThisRegion.begin(), ThisRegion.end()))
 				# view.show(ThisRegionEnd) #dont show move
 			elif(forward): #forward
-				ThisRegionBegin = ThisRegion.a
+				ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b
 				while( (view.substr(ThisRegionEnd) not in whiteChars) and (ThisRegionEnd < view.size())):
 					ThisRegionEnd += 1
@@ -568,10 +568,10 @@ class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 					ThisRegionEnd += 1
 				if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
 					ThisRegionEnd += 1
-				view.erase(edit, sublime.Region(ThisRegionBegin, ThisRegionEnd))
+				view.erase(edit, sublime.Region(ThisRegionBeg, ThisRegionEnd))
 				# view.show(ThisRegionEnd) #dont show move
 			else: #backward
-				ThisRegionBegin = ThisRegion.a
+				ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b-1
 				while( (view.substr(ThisRegionEnd) in spaceChars) and (ThisRegionEnd >= 0)):
 					ThisRegionEnd -= 1
@@ -579,7 +579,7 @@ class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 					ThisRegionEnd -= 1
 				if((ThisRegionEnd >= 0) and (ThisRegionEnd+1 == ThisRegion.b)):
 					ThisRegionEnd -= 1
-				view.erase(edit, sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+				view.erase(edit, sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 				view.show(ThisRegionEnd)
 				
 class DeleteToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
@@ -592,7 +592,7 @@ class DeleteToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
 				view.erase(edit, sublime.Region(ThisRegion.a, ThisRegion.b))
 				# view.show(ThisRegionEnd) #dont show move
 			elif(forward): #forward
-				# ThisRegionBegin = ThisRegion.a
+				# ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b
 				while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
 					ThisRegionEnd += 1
@@ -601,7 +601,7 @@ class DeleteToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
 				view.erase(edit, sublime.Region(ThisRegion.a, ThisRegionEnd))
 				# view.show(ThisRegionEnd) #dont show move
 			else: #backward
-				# ThisRegionBegin = ThisRegion.a
+				# ThisRegionBeg = ThisRegion.a
 				ThisRegionEnd = ThisRegion.b-1
 				while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd >= 0) ):
 					ThisRegionEnd -= 1
@@ -648,24 +648,24 @@ class SelectLineWoLinebreakCommand(sublime_plugin.TextCommand):
 def KnFullLine(mview, mRegion):
 	view = mview
 	
-	PosSelectionBegin = mRegion.begin()
+	PosSelectionBeg = mRegion.begin()
 	PosSelectionEnd = mRegion.end()
 	
-	PosSelectionBegin -= 1
-	while( not( (view.substr(PosSelectionBegin) == chr(10)) or (view.substr(PosSelectionBegin) == chr(13)) ) and (PosSelectionBegin >=0) ):
-		PosSelectionBegin -= 1
-	PosSelectionBegin += 1
+	PosSelectionBeg -= 1
+	while( not( (view.substr(PosSelectionBeg) == chr(10)) or (view.substr(PosSelectionBeg) == chr(13)) ) and (PosSelectionBeg >=0) ):
+		PosSelectionBeg -= 1
+	PosSelectionBeg += 1
 
-	if(PosSelectionBegin != PosSelectionEnd):
+	if(PosSelectionBeg != PosSelectionEnd):
 		PosSelectionEnd -= 1
 	while( (PosSelectionEnd <= view.size()-1) and not( (view.substr(PosSelectionEnd) == chr(10)) or (view.substr(PosSelectionEnd) == chr(13)) ) ):
 		PosSelectionEnd += 1
 	if(PosSelectionEnd != view.size()):
 		PosSelectionEnd += 1 # add the newline that you found
 	
-	#print("PosSelectionBegin=" + str(PosSelectionBegin))
+	#print("PosSelectionBeg=" + str(PosSelectionBeg))
 	#print("PosSelectionEnd=" + str(PosSelectionEnd))
-	ThisRegionFullline = sublime.Region(PosSelectionBegin, PosSelectionEnd)
+	ThisRegionFullline = sublime.Region(PosSelectionBeg, PosSelectionEnd)
 	return ThisRegionFullline
 
 #---------------------------------------------------------------
@@ -676,22 +676,22 @@ def KnFullLine(mview, mRegion):
 # 		oldSelRegions = list(view.sel())
 # 		view.sel().clear()
 # 		for ThisRegion in oldSelRegions:
-# 			ThisRegionBegin = ThisRegion.begin() - 1
-# 			while( (view.substr(ThisRegionBegin) not in ".") and (ThisRegionBegin >= 0)):
-# 				ThisRegionBegin -= 1
+# 			ThisRegionBeg = ThisRegion.begin() - 1
+# 			while( (view.substr(ThisRegionBeg) not in ".") and (ThisRegionBeg >= 0)):
+# 				ThisRegionBeg -= 1
 
-# 			ThisRegionBegin += 1
-# 			while( (view.substr(ThisRegionBegin) in whitespaceChars) and (ThisRegionBegin < view.size())):
-# 				ThisRegionBegin += 1
+# 			ThisRegionBeg += 1
+# 			while( (view.substr(ThisRegionBeg) in whitespaceChars) and (ThisRegionBeg < view.size())):
+# 				ThisRegionBeg += 1
 
 # 			ThisRegionEnd = ThisRegion.end()
 # 			while( (view.substr(ThisRegionEnd) not in ".") and (ThisRegionEnd < view.size())):
 # 				ThisRegionEnd += 1
 
-# 			if(ThisRegionBegin != ThisRegionEnd):
-# 				view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionEnd+1))
+# 			if(ThisRegionBeg != ThisRegionEnd):
+# 				view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionEnd+1))
 # 			else:
-# 				view.sel().add(sublime.Region(ThisRegionBegin, ThisRegionBegin))
+# 				view.sel().add(sublime.Region(ThisRegionBeg, ThisRegionBeg))
 			
 #---------------------------------------------------------------
 # Reference (no longer used)
