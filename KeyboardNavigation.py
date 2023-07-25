@@ -110,6 +110,36 @@ class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
         view.sel().add(sublime.Region(ThisRegionEnd+1))
         view.show(ThisRegionEnd)
 
+class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
+  def run(self, edit, forward, subwordDelims=defDelims):
+    view = self.view
+    regionsNew = []
+    for ThisRegion in view.sel():
+      ThisRegionBeg = ThisRegion.a
+      ThisRegionEnd = ThisRegion.b
+      endAdd = 0; endShow = 1
+      if(forward): # forward
+        while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims) ):
+          ThisRegionEnd += 1 # skip beg delimiters '¦-ddd¦'
+        while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims) ):
+          ThisRegionEnd += 1
+        if   ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b) ):
+          ThisRegionEnd += 1
+      else:        # backward
+        ThisRegionEnd -= 1
+        while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
+          ThisRegionEnd -= 1 # skip end delimiters '¦ddd-¦'
+        while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
+          ThisRegionEnd -= 1
+        if   ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b) ):
+          ThisRegionEnd -= 1
+        endAdd = 1; endShow = 0
+      regionsNew += sublime.Region(ThisRegionEnd+endAdd)
+    if regionsNew:
+      view.sel().clear()
+      view.sel().add_all(regionsNew)
+      view.show(ThisRegionEnd+endShow)
+
 #---------------------------------------------------------------
 class SelectToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward):
