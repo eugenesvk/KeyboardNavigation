@@ -1,4 +1,4 @@
-[{"caption":"🖮🟈","mnemonic":"K","id":"KeyboardNavigation","children":[
+[{"caption":"🖮🟈","mnemonic":"","id":"KeyboardNavigation","children":[
  {"caption":"-"                     	},
  {"caption":"⤝Beg ¦Bound ⎌Prev ↷Nxt"	,"command":"noop"                             	},
  {"caption":"Move ⎌ ⤝¦contig"       	,"command":"move_to_beg_of_contig_boundary"   	,"args":{"forward":false}},
