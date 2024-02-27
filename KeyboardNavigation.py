@@ -8,38 +8,37 @@ class MoveKn(sublime_plugin.TextCommand):
   def run(self, edit, arg, caseSep=False, subwordDelims=defDelims):
     moveT, direction, wordT, delimT = None, None, None, None
     side = ''
-    if "▋" in arg:
-      moveT	= "Select"
-    else:
-      moveT	= "Move"
-    if "⎌" in arg:
-      direction	= "Previous"
-    if "↷" in arg:
-      direction	= "Next"
-    if "¦" in arg:
-      delimT = "Boundary"
-    if "¦w" in arg:
-      side 	= "Beg"
-      wordT	= "Subword"
-    if "w¦" in arg:
-      side 	= "End"
-      wordT	= "Subword"
-    if "¦W" in arg:
-      side 	= "Beg"
-      wordT	= "Bigword"
-    if "W¦" in arg:
-      side 	= "End"
-      wordT	= "Bigword"
+    if "▋"     	in arg:
+      moveT    	= "Select"
+    else:      	#
+      moveT    	= "Move"
+    if "⎌"     	in arg:
+      direction	= "←"
+    if "↷"     	in arg:
+      direction	= "→"
+    if "¦"     	in arg:
+      delimT   	= "Boundary"
+    if "¦w"    	in arg:
+      side     	= "Beg"
+      wordT    	= "Subword"
+    if "w¦"    	in arg:
+      side     	= "End"
+      wordT    	= "Subword"
+    if "¦W"    	in arg:
+      side     	= "Beg"
+      wordT    	= "Bigword"
+    if "W¦"    	in arg:
+      side     	= "End"
+      wordT    	= "Bigword"
     if any(a is None for a in (direction, side, wordT)):
       return
-    forward = True if (direction == "Next") else False
     clsName = f"{moveT}To{side}Of{wordT}{delimT}Command"
     clsMoveKn = globals()[clsName]
-    clsMoveKn.run(self, edit, forward=forward, caseSep=caseSep, subwordDelims=subwordDelims)
+    clsMoveKn.run(self, edit, direction=direction, caseSep=caseSep, subwordDelims=subwordDelims)
 
 #---------------------------------------------------------------
 class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     # 32=space 9=tab 10=newline 13=carriagereturn
     whiteChars = (chr(32), chr(9), chr(10), chr(13))
@@ -52,7 +51,7 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
     view.sel().clear()
     for ThisRegion in RegionsSelOld:
     # for ThisRegion in view.sel():
-      if(forward): #forward
+      if direction=='→':
         boolAtNewline = False
         ThisRegionBeg = ThisRegion.a
         ThisRegionEnd = ThisRegion.b
@@ -91,11 +90,11 @@ class MoveToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
 
 # https://ee.hawaii.edu/~tep/EE160/Book/chap4/subsection2.1.1.1.html
 class MoveToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
-    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", caseSep=caseSep, subwordDelims=subwordDelims)
+  def run(self, edit, direction, caseSep=False, subwordDelims=defDelims):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, direction=direction, side="Beg", caseSep=caseSep, subwordDelims=subwordDelims)
 class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
-    MoveToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", caseSep=caseSep, subwordDelims=subwordDelims)
+  def run(self, edit, direction, caseSep=False, subwordDelims=defDelims):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, direction=direction, side="End", caseSep=caseSep, subwordDelims=subwordDelims)
 class MoveToSubwordBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, forward, side, caseSep=False, subwordDelims=defDelims):
     view = self.view
@@ -149,7 +148,7 @@ class MoveToSubwordBoundaryCommand(sublime_plugin.TextCommand):
 
 #---------------------------------------------------------------
 class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     # 32=space 9=tab 10=newline 13=carriagereturn
     whiteChars = (chr(32), chr(9), chr(10), chr(13))
@@ -162,7 +161,7 @@ class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
       ThisRegionEnd = ThisRegion.b
       endAdd = 0; endShow = 1
       if    (ThisRegionBeg == ThisRegionEnd):
-        if(forward): #forward
+        if direction == '→':
           boolAtNewline = False
           if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
             ThisRegionEnd += 1
@@ -193,7 +192,7 @@ class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
           endAdd = 1; endShow = 0
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
       elif  (ThisRegionBeg <  ThisRegionEnd):
-        if(forward): #forward
+        if direction == '→':
           boolAtNewline = False
           if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
             ThisRegionEnd += 1
@@ -224,7 +223,7 @@ class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
           endAdd = 1; endShow = 0
           regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
       else: #ThisRegionBeg >  ThisRegionEnd
-        if(forward): #forward
+        if direction == '→':
           boolAtNewline = False
           if( (view.substr(ThisRegionEnd) in newlineChars) and (ThisRegionEnd < view.size()) ):
             ThisRegionEnd += 1
@@ -342,14 +341,14 @@ class SelectToSubwordBoundaryCommand(sublime_plugin.TextCommand):
       view.show(ThisRegionEnd+endShow)
 
 class SelectToKnLinelimitCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     regionsNew = []
     for ThisRegion in view.sel():
       ThisRegionBeg = ThisRegion.a
       ThisRegionEnd = ThisRegion.b
       endAdd = 0; endShow = 0
-      if(forward): #forward
+      if direction == '→':
         ThisRegionEnd = view.line(ThisRegion).end()
         regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
       else: #backward
@@ -446,13 +445,13 @@ class ExpandSelectionToWhitespaceCommand(sublime_plugin.TextCommand):
 
 #---------------------------------------------------------------
 class KnLinelimitCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     regionsNew = []
     for ThisRegion in view.sel():
       ThisRegionBeg = view.line(ThisRegion).begin()
       ThisRegionEnd = view.line(ThisRegion).end()
-      if(forward): #forward
+      if direction == '→':
         regionTo    = ThisRegionEnd
         regionsNew += [regionTo]
       else: #backward
@@ -465,7 +464,7 @@ class KnLinelimitCommand(sublime_plugin.TextCommand):
 
 #---------------------------------------------------------------
 class KnIndentCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     RegionsSelOld = list(view.sel())
     regionsNew = []
@@ -478,10 +477,10 @@ class KnIndentCommand(sublime_plugin.TextCommand):
       ListLinesStrContent = StrContent.splitlines(True)
       NumLines = len(ListLinesStrContent)
       ListLinesStrContentNew = list()
-      if((NumLines == 0) and forward):
+      if((NumLines == 0) and (direction == '→')):
         view.replace(edit, ThisRegionFullline, chr(9))
         regionsNew += [sublime.Region(ThisRegionBeg+beginAdd)]
-      elif(forward): #forward
+      elif direction == '→':
         for StrThisLine in ListLinesStrContent:
           ListLinesStrContentNew.append(chr(9)+StrThisLine)
         view.replace(edit, ThisRegionFullline, ''.join(ListLinesStrContentNew))
@@ -616,12 +615,12 @@ class KnDuplicateLineCommand(sublime_plugin.TextCommand):
 
 #---------------------------------------------------------------
 class BlanklineAddCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     RegionsSelOld = list(view.sel())
     # view.sel().clear()
     for thisregion in RegionsSelOld:
-      if(forward): #forward
+      if direction == '→':
         posToInsertLineAt = KnFullLine(view, thisregion).end()
         #print(posToInsertLineAt)
         view.insert(edit, posToInsertLineAt, chr(10))
@@ -633,7 +632,7 @@ class BlanklineAddCommand(sublime_plugin.TextCommand):
 
 #---------------------------------------------------------------
 class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward):
+  def run(self, edit, direction):
     view = self.view
     whiteChars = (chr(32), chr(9), chr(10), chr(13))
     spaceChars = (chr(32), chr(9))
@@ -642,7 +641,7 @@ class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
       if(ThisRegion.a != ThisRegion.b):
         view.erase(edit, sublime.Region(ThisRegion.begin(), ThisRegion.end()))
         # view.show(ThisRegionEnd) #dont show move
-      elif(forward): #forward
+      elif direction == '→':
         ThisRegionBeg = ThisRegion.a
         ThisRegionEnd = ThisRegion.b
         while( (view.substr(ThisRegionEnd) not in whiteChars) and (ThisRegionEnd < view.size())):
@@ -666,13 +665,13 @@ class DeleteToBegOfContigBoundaryCommand(sublime_plugin.TextCommand):
         view.show(ThisRegionEnd)
 
 class DeleteToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, subwordDelims=defDelims):
+  def run(self, edit, direction, subwordDelims=defDelims):
     view = self.view
     for ThisRegion in view.sel():
       if(ThisRegion.a != ThisRegion.b):
         view.erase(edit, sublime.Region(ThisRegion.a, ThisRegion.b))
         # view.show(ThisRegionEnd) #dont show move
-      elif(forward): #forward
+      elif direction == '→':
         # ThisRegionBeg = ThisRegion.a
         ThisRegionEnd = ThisRegion.b
         while( (view.substr(ThisRegionEnd) not in subwordDelims) and (ThisRegionEnd < view.size()) ):
@@ -783,12 +782,12 @@ def KnFullLine(mview, mRegion):
 #---------------------------------------------------------------
 # Reference (no longer used)
 # class MoveToContigboundaryCommand(sublime_plugin.TextCommand):
-#   def run(self, edit, forward, extend=False):
+#   def run(self, edit, direction, extend=False):
 #     view = self.view
 #     oldSelRegions = list(view.sel())
 #     view.sel().clear()
 #     for ThisRegion in oldSelRegions:
-#       if(forward): #forward
+#       if direction == '→':
 #         caretPos = ThisRegion.b
 #         if(view.substr(caretPos) in whitespaceChars): #initially have whitespace right of me, find char
 #           while( (view.substr(caretPos) in whitespaceChars) and (caretPos < view.size())):
