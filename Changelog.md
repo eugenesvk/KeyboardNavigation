@@ -21,6 +21,10 @@ All notable changes to this project will be documented in this file
 <!-- - __Security__ -->
   <!-- + :lock:  -->
   <!-- vulnerabilities -->
+  - __Fixed__
+   + :beetle: select ignoring CaSe changes
+  - __Changed__
+   + :recycle: remove dupe word searches commands by combining word move and select classes
 
 [2.0.1]: https://github.com/eugenesvk/KeyboardNavigation/releases/tag/2.0.1
 ## [2.0.1]
