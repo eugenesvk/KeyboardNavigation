@@ -96,55 +96,67 @@ class MoveToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
   def run(self, edit, direction, caseSep=False, subwordDelims=defDelims):
     MoveToSubwordBoundaryCommand.run(self, edit=edit, direction=direction, side="End", caseSep=caseSep, subwordDelims=subwordDelims)
 class MoveToSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, side, caseSep=False, subwordDelims=defDelims):
-    view = self.view
+  def run(self, edit, direction, side, caseSep=False, subwordDelims=defDelims, tosel:bool=False):
+    v = self.view
     regionsNew = []
-    for ThisRegion in view.sel():
-      ThisRegionBeg = ThisRegion.a
-      ThisRegionEnd = ThisRegion.b
-      endAdd = 0; endShow = 1
-      curChar = view.substr(ThisRegionEnd)
+    for sel in v.sel():
+      # sel_left  = sel.begin()
+      # sel_right = sel.end  ()
+      sel_beg   = sel.a
+      caretFrom = sel.b
+      caretTo   = sel.b
+      curChar = v.substr(caretFrom)
       if caseSep:
         curCase = curChar.isupper() # watch caseChange to stop
-      if(forward): # forward
+      # print(f"a,b=({sel.a},{sel.b}) beg,end=({sel.begin()},{sel.end()}) caseSep={caseSep} direction={direction}") #" subwordDelims=¦{subwordDelims}¦")
+      if direction == '→': # select from the beginning
+        endAdd = 0; endShow = 1
         if side == "End":
-          while((ThisRegionEnd < view.size()) and (curChar     in subwordDelims)):
-            ThisRegionEnd += 1 # skip beg delimiters '¦-ddd¦'
-            curChar = view.substr(ThisRegionEnd)
+          while((caretTo < v.size()) and (curChar     in subwordDelims)):
+            caretTo  += 1 # skip beg delimiters '¦-ddd¦'
+            curChar = v.substr(caretTo)
         isFirst = True
-        while  ((ThisRegionEnd < view.size()) and (curChar not in subwordDelims)):
-          ThisRegionEnd   += 1
-          curChar   = view.substr(ThisRegionEnd)
+        while  ((caretTo < v.size()) and (curChar not in subwordDelims)):
+          caretTo    += 1
+          curChar  = v.substr(caretTo)
           if caseSep and not (curCase == (curCase := curChar.isupper())) and not isFirst:
             if not curCase: # move pre U in abcDEFUpper
-              ThisRegionEnd -= 1
+              caretTo -= 1
             break
           isFirst = False
-        if     ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
-          ThisRegionEnd   += 1
-      else:        # backward
-        ThisRegionEnd -= 1
+        if     ((caretTo < v.size()) and (caretTo == caretFrom)):
+          caretTo     += 1
+        if tosel:
+          regionsNew += [sublime.Region(sel_beg, caretTo + endAdd)]
+        else:
+          regionsNew += [sublime.Region(          caretTo + endAdd)]
+      else:          # ←     select from right-most range (end  )
+        endAdd = 1; endShow = 0
+        caretTo -= 1
         if side == "End": # skip end delimiters '¦ddd-¦'
-          while((ThisRegionEnd >= 0         ) and (curChar     in subwordDelims)):
-            ThisRegionEnd -= 1
-            curChar = view.substr(ThisRegionEnd)
+          while((caretTo >= 0         ) and (curChar     in subwordDelims)):
+            caretTo   -= 1
+            curChar = v.substr(caretTo)
         isFirst = True
-        while  ((ThisRegionEnd >= 0         ) and (curChar not in subwordDelims)):
-          ThisRegionEnd   -= 1
-          curChar   = view.substr(ThisRegionEnd)
+        while  ((caretTo >= 0         ) and (curChar not in subwordDelims)):
+          caretTo     -= 1
+          curChar   = v.substr(caretTo)
           if caseSep and not (curCase == (curCase := curChar.isupper())) and not isFirst:
             if     curCase: # move pre U in abcDEFUpper
-              ThisRegionEnd   -= 1
+              caretTo -= 1
             break
           isFirst = False
-        if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b)):
-          ThisRegionEnd   -= 1
-        endAdd = 1; endShow = 0
-      regionsNew += [sublime.Region(ThisRegionEnd+endAdd)]
+        if     ((caretTo >= 0         ) and (caretTo+1 == caretFrom)):
+          caretTo     -= 1
+        if tosel:
+          regionsNew += [sublime.Region(sel_beg, caretTo+endAdd)]
+        else:
+          regionsNew += [sublime.Region(           caretTo+endAdd)]
     if regionsNew:
-      view.sel().clear()
-      view.sel().add_all(regionsNew)
-      view.show(ThisRegionEnd+endShow)
+      v.sel().clear()
+      v.sel().add_all(regionsNew)
+      v.show(caretTo+endShow)
+      # print(regionsNew)
 
 #---------------------------------------------------------------
 class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
@@ -259,86 +271,12 @@ class SelectToOfContigBoundaryCommand(sublime_plugin.TextCommand):
       view.show(ThisRegionEnd+endShow)
 
 class SelectToBegOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
-    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="Beg", caseSep=caseSep, subwordDelims=subwordDelims)
+  def run                           (self, edit     , direction                    , caseSep=False  , subwordDelims=defDelims                ):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, direction=direction, side="Beg", caseSep=caseSep, subwordDelims=subwordDelims, tosel=True)
 class SelectToEndOfSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, caseSep=False, subwordDelims=defDelims):
-    SelectToSubwordBoundaryCommand.run(self, edit=edit, forward=forward, side="End", caseSep=caseSep, subwordDelims=subwordDelims)
-class SelectToSubwordBoundaryCommand(sublime_plugin.TextCommand):
-  def run(self, edit, forward, side, caseSep=False, subwordDelims=defDelims):
-    view = self.view
-    regionsNew = []
-    for ThisRegion in view.sel():
-      ThisRegionBeg = ThisRegion.a
-      ThisRegionEnd = ThisRegion.b
-      endAdd = 0; endShow = 1
-      if    (ThisRegion.a == ThisRegion.b):
-        if(forward): #forward
-          if side == "End": # skip beg delimiters '¦-ddd¦'
-            while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-              ThisRegionEnd += 1
-          while(  (ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-            ThisRegionEnd   += 1
-          if((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegionBeg)):
-            ThisRegionEnd   += 1
-          regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-        else: #backward
-          ThisRegionEnd -= 1
-          if side == "End": # skip end delimiters '¦ddd-¦'
-            while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-              ThisRegionEnd -= 1
-          while  ((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-            ThisRegionEnd   -= 1
-          if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegionBeg)):
-            ThisRegionEnd -= 1
-          endAdd = 1; endShow = 0
-          regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-      elif  (ThisRegion.a < ThisRegion.b):
-        if(forward): #forward
-          if side == "End": # skip beg delimiters '¦-ddd¦'
-            while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-              ThisRegionEnd += 1
-          while  ((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-            ThisRegionEnd   += 1
-          if     ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
-            ThisRegionEnd   += 1
-          regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-        else: #backward
-          ThisRegionEnd -= 1
-          if side == "End": # skip end delimiters '¦ddd-¦'
-            while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-              ThisRegionEnd -= 1
-          while  ((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-            ThisRegionEnd   -= 1
-          if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b)):
-            ThisRegionEnd   -= 1
-          endAdd = 1; endShow = 0
-          regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-      else: #ThisRegion.a > ThisRegion.b
-        if(forward): #forward
-          if side == "End": # skip beg delimiters '¦-ddd¦'
-            while((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-              ThisRegionEnd += 1
-          while  ((ThisRegionEnd < view.size()) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-            ThisRegionEnd   += 1
-          if     ((ThisRegionEnd < view.size()) and (ThisRegionEnd == ThisRegion.b)):
-            ThisRegionEnd   += 1
-          regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-        else: #backward
-          ThisRegionEnd -= 1
-          if side == "End": # skip end delimiters '¦ddd-¦'
-            while((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd)     in subwordDelims)):
-              ThisRegionEnd -= 1
-          while  ((ThisRegionEnd >= 0         ) and (view.substr(ThisRegionEnd) not in subwordDelims)):
-            ThisRegionEnd   -= 1
-          if     ((ThisRegionEnd >= 0         ) and (ThisRegionEnd+1 == ThisRegion.b)):
-            ThisRegionEnd   -= 1
-          endAdd = 1; endShow = 0
-          regionsNew += [sublime.Region(ThisRegionBeg, ThisRegionEnd+endAdd)]
-    if regionsNew:
-      view.sel().clear()
-      view.sel().add_all(regionsNew)
-      view.show(ThisRegionEnd+endShow)
+  def run                           (self, edit     , direction                    , caseSep=False  , subwordDelims=defDelims                ):
+    MoveToSubwordBoundaryCommand.run(self, edit=edit, direction=direction, side="End", caseSep=caseSep, subwordDelims=subwordDelims, tosel=True)
+
 
 class SelectToKnLinelimitCommand(sublime_plugin.TextCommand):
   def run(self, edit, direction):
