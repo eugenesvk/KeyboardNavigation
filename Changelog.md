@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file
 
-[unreleased]: https://github.com/eugenesvk/KeyboardNavigation/compare/2.0.1...HEAD
+[unreleased]: https://github.com/eugenesvk/KeyboardNavigation/compare/2.0.2...HEAD
 ## [Unreleased]
 <!-- - __Added__ -->
   <!-- + :sparkles:  -->
@@ -21,6 +21,9 @@ All notable changes to this project will be documented in this file
 <!-- - __Security__ -->
   <!-- + :lock:  -->
   <!-- vulnerabilities -->
+
+[2.0.2]: https://github.com/eugenesvk/KeyboardNavigation/releases/tag/2.0.2
+## [2.0.2]
   - __Fixed__
    + :beetle: select ignoring CaSe changes
   - __Changed__
